@@ -4,6 +4,9 @@ import time
 import tkinter as tk
 from tkinter import ttk
 import threading
+import re # Используеться для поиска во всем тексте системы нужных параметров
+import winreg # Дает информацию о системе с реестра
+
 
 class ClientGUI:
     def __init__(self, root):
@@ -74,8 +77,13 @@ class ClientGUI:
             self.clear_button.config(state=tk.NORMAL)
             self.connection_status_label.config(text="Состояние: Подключено", foreground="green")
 
-            client_os = platform.system()
-            self.client_socket.sendall(client_os.encode())
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
+            product_name = winreg.QueryValueEx(key, "ProductName")[0]
+            version_name = re.search(r"Windows \d+", product_name).group()
+            version_name = version_name.replace("Windows ", "Windows: ")
+            self.log_message(f"{version_name}")
+            client_send = f"{version_name}"
+            self.client_socket.sendall(client_send.encode())
 
             response = self.client_socket.recv(1024).decode()
             self.log_message(f"Ответ от сервера: {response}")
@@ -119,6 +127,7 @@ class ClientGUI:
             except Exception as e:
                 self.disconnect_from_server()
                 break
+
 
 if __name__ == "__main__":
     root = tk.Tk()
