@@ -1,10 +1,10 @@
 import socket
-import platform
 import datetime
 import tkinter as tk
 from tkinter import ttk
 from packaging import version
 import threading
+
 
 class ServerGUI:
     def __init__(self, root):
@@ -95,23 +95,26 @@ class ServerGUI:
         try:
             self.log_message(f"Подключение установлено с {client_address}")
             client_ip, client_port = client_address
-            client_os = client_socket.recv(1024).decode()
-            version_os = platform.release()
-            selected_version = self.version_combobox.get()  # Получаем выбранную версию Windows
-            self.log_message(f"Версия Windows клиента: {version_os}, Выбранная версия: {selected_version}")
-            self.log_message(f"IP: {client_ip}\nPORT: {client_port}")
-            with open('log.txt', 'a') as f:
-                f.write(
-                    f"DAY:{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nIP: {client_ip}\nPORT: {client_port}\nOS: {client_os}\nVersion_OS: {version_os}\nSelected_Version: {selected_version}\n______\n")
 
-            if client_os.startswith("Windows"):
-                if version.parse(version_os) >= version.parse(selected_version):
-                    client_socket.sendall(bytes(f'Вы используете Windows версии {selected_version} или\nвыше.', 'utf-8'))
+            client_os = client_socket.recv(1024).decode() # Получаем информацию о версии ОС клиента
+            client_name = client_os.split(": ")[0]
+            client_version = client_os.split(": ")[1]
+            self.log_message(f"Операционная система клиента - {client_name}:{client_version}")
+
+            selected_version = self.version_combobox.get()  # Получаем выбранную версию Windows
+
+            if client_name.startswith("Windows"):
+                self.log_message(f"Версия Windows клиента: {client_version}, Выбранная версия: {selected_version}")
+                if version.parse(client_version) >= version.parse(selected_version):
+                    client_socket.sendall(bytes(f'Вы используете Windows версии {selected_version} или выше.', 'utf-8'))
                 else:
-                    client_socket.sendall(bytes(f'Вы используете Windows версии ниже {selected_version}. Доступ к серверу закрыт!', 'utf-8'))
-                    client_socket.close()  # Закрыть соединение с клиентом
+                    client_socket.sendall(
+                        bytes(f'Вы используете Windows версии ниже {selected_version}. Доступ к серверу закрыт!',
+                              'utf-8'))
+                    client_socket.close()
             else:
                 client_socket.sendall(bytes('Этот сервер поддерживает только Windows.', 'utf-8'))
+
             # Сохраняем ссылку на соединение с клиентом
             self.client_connections[client_address] = client_socket
         except Exception as e:
