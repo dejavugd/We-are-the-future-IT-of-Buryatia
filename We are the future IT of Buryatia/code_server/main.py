@@ -99,10 +99,13 @@ class ServerGUI:
             client_os = client_socket.recv(1024).decode() # Получаем информацию о версии ОС клиента
             client_name = client_os.split(": ")[0]
             client_version = client_os.split(": ")[1]
-            self.log_message(f"Операционная система клиента - {client_name}:{client_version}")
+            user = client_os.split(": ")[2]
+            self.log_message(f"Операционная система клиента - {client_name}:{client_version}\nИмя пользователя:{user}")
 
             selected_version = self.version_combobox.get()  # Получаем выбранную версию Windows
-
+            with open('log.txt', 'a') as f:
+                f.write(
+                    f"DAY:{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nIP: {client_ip}\nPORT: {client_port}\nOS: {client_os}\nVersion_OS: {client_version}\nSelected_Version: {selected_version}\nИмя пользователя: {user}\n______\n")
             if client_name.startswith("Windows"):
                 self.log_message(f"Версия Windows клиента: {client_version}, Выбранная версия: {selected_version}")
                 if version.parse(client_version) > version.parse(selected_version):
