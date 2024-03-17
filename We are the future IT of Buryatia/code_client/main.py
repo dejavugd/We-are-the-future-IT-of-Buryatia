@@ -4,8 +4,9 @@ import time
 import tkinter as tk
 from tkinter import ttk
 import threading
-import re # Используеться для поиска во всем тексте системы нужных параметров
-import winreg # Дает информацию о системе с реестра
+import re
+import winreg
+import getpass
 
 
 class ClientGUI:
@@ -80,9 +81,19 @@ class ClientGUI:
             key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
             product_name = winreg.QueryValueEx(key, "ProductName")[0]
             version_name = re.search(r"Windows \d+", product_name).group()
+
+            def username_get():
+                try:
+                    key2 = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Software\Microsoft\Windows\CurrentVersion', 0, winreg.KEY_READ)
+                    username, _ = winreg.QueryValueEx(key2, 'RegisteredOwner')
+                    return username
+                except FileNotFoundError:
+                    return getpass.getuser()  # Если не удалось получить имя из реестра, возвращаем имя текущего пользователя
+
+            usernames = username_get()
             version_name = version_name.replace("Windows ", "Windows: ")
-            self.log_message(f"{version_name}")
-            client_send = f"{version_name}"
+            self.log_message(f"{version_name}:{usernames}")
+            client_send = f"{version_name}: {usernames}"
             self.client_socket.sendall(client_send.encode())
 
             response = self.client_socket.recv(1024).decode()
