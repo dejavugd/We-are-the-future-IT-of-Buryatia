@@ -15,6 +15,7 @@ class ServerGUI:
         self.style = ttk.Style()
         self.style.configure('TButton', font=('Helvetica', 12), padding=5)
 
+
         # Надпись "Сервер не запущен"
         self.label = tk.Label(root, text="Сервер не запущен", font=('Helvetica', 14, 'bold'), fg="red")
         self.label.pack(pady=10)
@@ -29,11 +30,18 @@ class ServerGUI:
         self.port_entry = tk.Entry(root, font=('Helvetica', 12))
         self.port_entry.pack()
 
+        # Добавление элементов для ввода user
+        self.port_label = tk.Label(root, text="Пользователь(и):", font=('Helvetica', 12))
+        self.port_label.pack()
+        self.user_data_entry = tk.Entry(root, font=('Helvetica', 12))
+        self.user_data_entry.pack()
+
         # Добавляем выпадающий список для выбора версии Windows
         self.version_label = tk.Label(root, text="Минимальная версия Windows:", font=('Helvetica', 12))
         self.version_label.pack()
         self.version_combobox = ttk.Combobox(root, font=('Helvetica', 12), values=["7", "8", "8.1", "10", "11"])
         self.version_combobox.pack()
+
 
         # Кнопки и текстовое поле как в вашем примере
         self.start_button = ttk.Button(root, text="Запустить сервер", command=self.start_server)
@@ -101,7 +109,8 @@ class ServerGUI:
             client_version = client_os.split(": ")[1]
             user = client_os.split(": ")[2]
             self.log_message(f"Операционная система клиента - {client_name}:{client_version}\nИмя пользователя:{user}")
-
+            white_list_user = str(self.user_data_entry.get())
+            modified_user_whitelist = white_list_user.replace(' ', ';')
             selected_version = self.version_combobox.get()  # Получаем выбранную версию Windows
             with open('log.txt', 'a') as f:
                 f.write(
@@ -109,12 +118,17 @@ class ServerGUI:
             if client_name.startswith("Windows"):
                 self.log_message(f"Версия Windows клиента: {client_version}, Выбранная версия: {selected_version}")
                 if version.parse(client_version) > version.parse(selected_version):
-                    client_socket.sendall(
-                        bytes(f'Вы используете Windows версию выше чем {selected_version} .', 'utf-8'))
-                    client_socket.close()
+                    if check_username_in_list(modified_user_whitelist, user):
+                        client_socket.sendall(bytes(f'Вы используете Windows версию выше чем {selected_version}, Имя пользователя {user} найден в списке.', 'utf-8'))
+                    else:
+                        client_socket.sendall(bytes(f'Вы используете Windows версию выше чем {selected_version}, Имя пользователя {user} не найден в списке.','utf-8'))
+                        client_socket.close()
                 elif version.parse(client_version) == version.parse(selected_version):
-                    client_socket.sendall(
-                        bytes(f'Вы используете Windows той же версии {selected_version}.', 'utf-8'))
+                    if check_username_in_list(modified_user_whitelist, user):
+                        client_socket.sendall(bytes(f'Вы используете Windows той же версии {selected_version}. Имя пользователя {user} найден в списке.', 'utf-8'))
+                    else:
+                        client_socket.sendall(bytes(f'Вы используете Windows той же версии {selected_version}. Имя пользователя {user} не найден в списке.','utf-8'))
+                        client_socket.close()
                 else:
                     client_socket.sendall(
                         bytes(f'Вы используете Windows версии ниже {selected_version}. Доступ к серверу закрыт!',
@@ -143,6 +157,10 @@ class ServerGUI:
     def clear_logs(self):
         self.text_area.delete('1.0', tk.END)
         self.clear_button.config(state=tk.DISABLED)
+
+
+def check_username_in_list(modified_user_whitelist, user):
+    return user in modified_user_whitelist
 
 
 if __name__ == "__main__":
