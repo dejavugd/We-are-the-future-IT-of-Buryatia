@@ -105,8 +105,13 @@ class ServerGUI:
 
             if client_name.startswith("Windows"):
                 self.log_message(f"Версия Windows клиента: {client_version}, Выбранная версия: {selected_version}")
-                if version.parse(client_version) >= version.parse(selected_version):
-                    client_socket.sendall(bytes(f'Вы используете Windows версии {selected_version} или выше.', 'utf-8'))
+                if version.parse(client_version) > version.parse(selected_version):
+                    client_socket.sendall(
+                        bytes(f'Вы используете Windows версию выше чем {selected_version} .', 'utf-8'))
+                    client_socket.close()
+                elif version.parse(client_version) == version.parse(selected_version):
+                    client_socket.sendall(
+                        bytes(f'Вы используете Windows той же версии {selected_version}.', 'utf-8'))
                 else:
                     client_socket.sendall(
                         bytes(f'Вы используете Windows версии ниже {selected_version}. Доступ к серверу закрыт!',
