@@ -11,37 +11,35 @@ class ServerGUI:
         self.root = root
         self.root.title("Server BRMTIT")
 
+
         # Стиль для кнопок
         self.style = ttk.Style()
         self.style.configure('TButton', font=('Helvetica', 12), padding=5)
+        self.style.configure('TEntry', font=('Helvetica', 12))
+        self.style.configure('TLabel', font=('Helvetica', 12))
 
-
-        # Надпись "Сервер не запущен"
-        self.label = tk.Label(root, text="Сервер не запущен", font=('Helvetica', 14, 'bold'), fg="red")
-        self.label.pack(pady=10)
 
         # Надпись "Выполнила команда БРМТИТ"
         self.credit_label = tk.Label(root, text="Выполнила команда БРМТИТ", font=('Helvetica', 10))
         self.credit_label.pack(side=tk.BOTTOM, pady=10)
 
         # Добавление элементов для ввода порта
-        self.port_label = tk.Label(root, text="Порт:", font=('Helvetica', 12))
-        self.port_label.pack()
-        self.port_entry = tk.Entry(root, font=('Helvetica', 12))
-        self.port_entry.pack()
+        self.port_label = tk.Label(root, text="Порт сервера:", font=('Helvetica', 12))
+        self.port_label.pack(pady=5)
+        self.port_entry = ttk.Entry(root, font=('Helvetica', 12))
+        self.port_entry.pack(pady=5)
 
         # Добавление элементов для ввода user
-        self.port_label = tk.Label(root, text="Пользователь(и):", font=('Helvetica', 12))
-        self.port_label.pack()
-        self.user_data_entry = tk.Entry(root, font=('Helvetica', 12))
+        self.username_label = tk.Label(root, text="Имя пользователя:", font=('Helvetica', 12))
+        self.username_label.pack(pady=5)
+        self.user_data_entry = ttk.Entry(root, font=('Helvetica', 12))
         self.user_data_entry.pack()
 
         # Добавляем выпадающий список для выбора версии Windows
-        self.version_label = tk.Label(root, text="Минимальная версия Windows:", font=('Helvetica', 12))
-        self.version_label.pack()
+        self.version_label = tk.Label(root, text="Минимальная версия OC:", font=('Helvetica', 12))
+        self.version_label.pack(pady=5)
         self.version_combobox = ttk.Combobox(root, font=('Helvetica', 12), values=["7", "8", "8.1", "10", "11"])
-        self.version_combobox.pack()
-
+        self.version_combobox.pack(pady=5)
 
         # Кнопки и текстовое поле как в вашем примере
         self.start_button = ttk.Button(root, text="Запустить сервер", command=self.start_server)
@@ -55,6 +53,10 @@ class ServerGUI:
 
         self.text_area = tk.Text(root, width=50, height=15, font=('Helvetica', 12))
         self.text_area.pack(padx=10, pady=10)
+
+        # Надпись "Сервер не запущен"
+        self.label = tk.Label(root, text="Сервер не запущен", font=('Helvetica', 12), fg="red")
+        self.label.pack(pady=10)
 
         self.server_running = False
         self.client_connections = {}  # Словарь для хранения соединений с клиентами
@@ -108,6 +110,7 @@ class ServerGUI:
             client_name = client_os.split(": ")[0]
             client_version = client_os.split(": ")[1]
             user = client_os.split(": ")[2]
+
             self.log_message(f"Операционная система клиента - {client_name}:{client_version}\nИмя пользователя:{user}")
             white_list_user = str(self.user_data_entry.get())
             modified_user_whitelist = white_list_user.replace(' ', ';')
@@ -160,7 +163,10 @@ class ServerGUI:
 
 
 def check_username_in_list(modified_user_whitelist, user):
-    return user in modified_user_whitelist
+    if modified_user_whitelist == "":
+        return user
+    else: return user in modified_user_whitelist
+
 
 
 if __name__ == "__main__":
