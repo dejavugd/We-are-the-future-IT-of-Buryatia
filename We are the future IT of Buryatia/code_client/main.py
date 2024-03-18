@@ -1,5 +1,4 @@
 import socket
-import platform
 import time
 import tkinter as tk
 from tkinter import ttk
@@ -23,18 +22,18 @@ class ClientGUI:
         # Поле ввода для IP адреса сервера
         self.ip_label = ttk.Label(root, text="IP адрес сервера:")
         self.ip_label.pack(pady=5)
-        self.ip_entry = ttk.Entry(root)
-        self.ip_entry.pack()
+        self.ip_entry = ttk.Entry(root, font=('Helvetica', 12))
+        self.ip_entry.pack(pady=5)
 
         # Поле ввода для порта сервера
         self.port_label = ttk.Label(root, text="Порт сервера:")
         self.port_label.pack(pady=5)
-        self.port_entry = ttk.Entry(root)
-        self.port_entry.pack()
+        self.port_entry = ttk.Entry(root, font=('Helvetica', 12))
+        self.port_entry.pack(pady=5)
 
         # Кнопка для подключения к серверу
         self.connect_button = ttk.Button(root, text="Подключиться к серверу", command=self.connect_to_server)
-        self.connect_button.pack(pady=5)
+        self.connect_button.pack(pady=10)
 
         # Кнопка для отключения от сервера
         self.disconnect_button = ttk.Button(root, text="Отключиться от сервера", command=self.disconnect_from_server,
@@ -45,13 +44,16 @@ class ClientGUI:
         self.clear_button = ttk.Button(root, text="Очистить логи", command=self.clear_logs, state=tk.DISABLED)
         self.clear_button.pack(pady=5)
 
+        self.empty_label = tk.Label(root, text="", font=('Helvetica', 12))
+        self.empty_label.pack(pady=16)
+
         # Текстовое поле для отображения логов
         self.text_area = tk.Text(root, width=50, height=15, font=('Helvetica', 12))
         self.text_area.pack(padx=10, pady=10)
 
         # Метка с информацией о состоянии подключения
         self.connection_status_label = ttk.Label(root, text="Состояние: Не подключено", font=('Helvetica', 12), foreground="red")
-        self.connection_status_label.pack(pady=5)
+        self.connection_status_label.pack(pady=10)
 
         # Метка с информацией о создателе
         self.credit_label = ttk.Label(root, text="Выполнила команда БРМТИТ", font=('Helvetica', 10))
